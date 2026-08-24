@@ -60,7 +60,7 @@ jobs:
           DEPLOY_NAME: tanetpon
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           IMAGE_NAME: ${{ github.event.repository.name }}
-          HOST_PORT: 30020
+          HOST_PORT: 30021
           CONTAINER_NAME: tanetpon-student-work-log
         with:
           host: ${{ secrets.SSH_HOST }}

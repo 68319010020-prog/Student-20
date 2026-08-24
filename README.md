@@ -15,7 +15,7 @@
 - `DOCKERHUB_USERNAME`: `ponlpon`
 - `DOCKERHUB_TOKEN`: Docker Hub access token ของตัวเอง
 
-โปรเจกต์นี้กำหนดค่าประจำตัวไว้แล้ว: โฟลเดอร์ `~/apps/tanetpon/`, พอร์ต `30020`, container `tanetpon-student-work-log`, image `ponlpon/student-work-log:latest`
+โปรเจกต์นี้กำหนดค่าประจำตัวไว้แล้ว: โฟลเดอร์ `~/apps/tanetpon/`, พอร์ต `30021`, container `tanetpon-student-work-log`, image `ponlpon/student-work-log:latest`
 
 ## Onboarding SSH ครั้งแรก
 
@@ -32,9 +32,9 @@ ssh -p 22210 -i ~/.ssh/vps01_deploy vps01@202.29.231.188
 ## Deploy
 
 1. ตั้ง Secrets ให้ครบ
-2. ตรวจว่าพอร์ต `30020` ไม่ชนกับคนอื่น โดยดู `docker ps` บน VPS
+2. ตรวจว่าพอร์ต `30021` ไม่ชนกับคนอื่น โดยดู `docker ps` บน VPS
 3. Push ไป branch `main`
-4. เปิด `http://202.29.231.188:30020`
+4. เปิด `http://202.29.231.188:30021`
 
 Workflow จะสร้างโฟลเดอร์ `~/apps/tanetpon/`, อัปโหลด `docker-compose.yml` และรัน `docker compose pull` กับ `docker compose up -d`
 

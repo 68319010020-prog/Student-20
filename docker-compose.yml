@@ -4,7 +4,7 @@ services:
     container_name: tanetpon-student-work-log
     restart: unless-stopped
     ports:
-      - "30020:3000"
+      - "30021:3000"
     volumes:
       - tanetpon-student-work-log-data:/app/data
     networks:
