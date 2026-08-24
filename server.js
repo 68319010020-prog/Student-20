@@ -25,6 +25,7 @@ database.exec(`
     subject TEXT NOT NULL,
     due_date TEXT,
     status TEXT NOT NULL DEFAULT 'todo' CHECK(status IN ('todo', 'doing', 'done')),
+    priority TEXT NOT NULL DEFAULT 'normal' CHECK(priority IN ('low', 'normal', 'high')),
     notes TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )
@@ -32,16 +33,17 @@ database.exec(`
 
 const assignmentColumns = database.prepare('PRAGMA table_info(assignments)').all().map((column) => column.name);
 if (!assignmentColumns.includes('user_id')) database.exec('ALTER TABLE assignments ADD COLUMN user_id INTEGER REFERENCES users(id)');
+if (!assignmentColumns.includes('priority')) database.exec("ALTER TABLE assignments ADD COLUMN priority TEXT NOT NULL DEFAULT 'normal'");
 
 const sessionSecretPath = path.join(dataDirectory, 'session-secret');
 if (!fs.existsSync(sessionSecretPath)) fs.writeFileSync(sessionSecretPath, crypto.randomBytes(32), { mode: 0o600 });
 const sessionSecret = fs.readFileSync(sessionSecretPath);
 
 const statements = {
-  list: database.prepare('SELECT * FROM assignments WHERE user_id = ? ORDER BY CASE WHEN status = \'done\' THEN 1 ELSE 0 END, due_date IS NULL, due_date ASC, id DESC'),
+  list: database.prepare('SELECT * FROM assignments WHERE user_id = ? ORDER BY CASE WHEN status = \'done\' THEN 1 ELSE 0 END, CASE priority WHEN \'high\' THEN 0 WHEN \'normal\' THEN 1 ELSE 2 END, due_date IS NULL, due_date ASC, id DESC'),
   get: database.prepare('SELECT * FROM assignments WHERE id = ? AND user_id = ?'),
-  insert: database.prepare('INSERT INTO assignments (user_id, title, subject, due_date, status, notes) VALUES (@user_id, @title, @subject, @due_date, @status, @notes)'),
-  update: database.prepare('UPDATE assignments SET title=@title, subject=@subject, due_date=@due_date, status=@status, notes=@notes WHERE id=@id AND user_id=@user_id'),
+  insert: database.prepare('INSERT INTO assignments (user_id, title, subject, due_date, status, priority, notes) VALUES (@user_id, @title, @subject, @due_date, @status, @priority, @notes)'),
+  update: database.prepare('UPDATE assignments SET title=@title, subject=@subject, due_date=@due_date, status=@status, priority=@priority, notes=@notes WHERE id=@id AND user_id=@user_id'),
   remove: database.prepare('DELETE FROM assignments WHERE id = ? AND user_id = ?'),
   userByName: database.prepare('SELECT * FROM users WHERE username = ?'),
   userById: database.prepare('SELECT id, username FROM users WHERE id = ?'),
@@ -102,13 +104,16 @@ function validateAssignment(input) {
   const title = String(input.title || '').trim();
   const subject = String(input.subject || '').trim();
   const status = input.status || 'todo';
+  const priority = input.priority || 'normal';
   if (!title || !subject) return { error: 'กรุณากรอกชื่องานและวิชา' };
   if (!['todo', 'doing', 'done'].includes(status)) return { error: 'สถานะไม่ถูกต้อง' };
+  if (!['low', 'normal', 'high'].includes(priority)) return { error: 'ระดับความสำคัญไม่ถูกต้อง' };
   return {
     title: title.slice(0, 120),
     subject: subject.slice(0, 80),
     due_date: input.due_date ? String(input.due_date).slice(0, 10) : null,
     status,
+    priority,
     notes: String(input.notes || '').trim().slice(0, 500)
   };
 }

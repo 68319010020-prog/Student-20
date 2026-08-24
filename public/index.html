@@ -55,7 +55,7 @@
       <input id="assignmentId" type="hidden">
       <label>ชื่องาน<input id="titleInput" name="title" required maxlength="120" placeholder="เช่น ส่งรายงานวิทยาศาสตร์"></label>
       <div class="form-row"><label>วิชา<input id="subjectInput" name="subject" required maxlength="80" placeholder="เช่น วิทยาศาสตร์"></label><label>กำหนดส่ง<input id="dueDateInput" name="due_date" type="date"></label></div>
-      <label>สถานะ<select id="statusInput" name="status"><option value="todo">ยังไม่เริ่ม</option><option value="doing">กำลังทำ</option><option value="done">เสร็จแล้ว</option></select></label>
+      <div class="form-row"><label>สถานะ<select id="statusInput" name="status"><option value="todo">ยังไม่เริ่ม</option><option value="doing">กำลังทำ</option><option value="done">เสร็จแล้ว</option></select></label><label>ความสำคัญ<select id="priorityInput" name="priority"><option value="normal">ปกติ</option><option value="high">สำคัญมาก</option><option value="low">ไว้ทีหลัง</option></select></label></div>
       <label>โน้ตเพิ่มเติม<textarea id="notesInput" name="notes" rows="3" maxlength="500" placeholder="รายละเอียดสั้นๆ หรือสิ่งที่ต้องเตรียม"></textarea></label>
       <div class="dialog-actions"><button class="text-button" id="cancelButton" type="button">ยกเลิก</button><button class="primary-button" type="submit">บันทึกงาน</button></div>
     </form>

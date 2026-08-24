@@ -24,7 +24,7 @@ function render() {
   });
   list.innerHTML = visible.length ? visible.map((item) => `<article class="assignment ${item.status}">
     <div class="assignment-bar"></div><div class="assignment-main"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.subject)}${item.notes ? ` · ${escapeHtml(item.notes)}` : ''}</p></div>
-    <div class="assignment-meta"><span class="badge">${labels[item.status]}</span><span class="due ${item.due_date && item.status !== 'done' && item.due_date < new Date().toISOString().slice(0,10) ? 'overdue' : ''}">${formatDate(item.due_date)}</span><div class="actions"><button class="icon-button edit-button" data-id="${item.id}" aria-label="แก้ไข">✎</button><button class="icon-button delete-button" data-id="${item.id}" aria-label="ลบ">×</button></div></div>
+    <div class="assignment-meta"><span class="badge">${labels[item.status]}</span>${item.priority === 'high' ? '<span class="priority-badge">สำคัญมาก</span>' : ''}<span class="due ${item.due_date && item.status !== 'done' && item.due_date < new Date().toISOString().slice(0,10) ? 'overdue' : ''}">${formatDate(item.due_date)}</span><div class="actions"><button class="icon-button edit-button" data-id="${item.id}" aria-label="แก้ไข">✎</button><button class="icon-button delete-button" data-id="${item.id}" aria-label="ลบ">×</button></div></div>
   </article>`).join('') : '<div class="empty"><strong>ยังไม่มีงานในมุมมองนี้</strong><span>เพิ่มงานแรกของคุณ แล้วค่อยๆ ทำให้เสร็จทีละอย่าง</span></div>';
   const done = state.assignments.filter((item) => item.status === 'done').length;
   const doing = state.assignments.filter((item) => item.status === 'doing').length;
@@ -40,7 +40,7 @@ function render() {
 async function loadAssignments() { state.assignments = await request('/api/assignments'); render(); }
 function openForm(item) {
   form.reset(); document.querySelector('#assignmentId').value = item?.id || ''; document.querySelector('#dialogTitle').textContent = item ? 'แก้ไขงาน' : 'เพิ่มงานใหม่';
-  if (item) ['title', 'subject', 'due_date', 'status', 'notes'].forEach((field) => { document.querySelector(`#${field === 'due_date' ? 'dueDate' : field}Input`).value = item[field] || ''; });
+  if (item) ['title', 'subject', 'due_date', 'status', 'priority', 'notes'].forEach((field) => { document.querySelector(`#${field === 'due_date' ? 'dueDate' : field}Input`).value = item[field] || ''; });
   dialog.showModal(); document.querySelector('#titleInput').focus();
 }
 
