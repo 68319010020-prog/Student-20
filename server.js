@@ -125,8 +125,10 @@ app.get('/api/me', (req, res) => {
 app.post('/api/register', (req, res) => {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
+  const confirmPassword = String(req.body.confirm_password || '');
   if (!/^[a-zA-Z0-9_ก-๙-]{3,30}$/.test(username)) return res.status(400).json({ error: 'ชื่อผู้ใช้ต้องยาว 3-30 ตัวอักษร' });
   if (password.length < 6) return res.status(400).json({ error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' });
+  if (password !== confirmPassword) return res.status(400).json({ error: 'รหัสผ่านไม่ตรงกัน' });
   if (statements.userByName.get(username)) return res.status(409).json({ error: 'ชื่อผู้ใช้นี้ถูกใช้แล้ว' });
   const result = statements.createUser.run(username, passwordHash(password));
   statements.claimLegacyAssignments.run(result.lastInsertRowid);
