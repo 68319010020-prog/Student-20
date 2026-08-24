@@ -87,6 +87,6 @@ jobs:
             cd "$DEPLOY_DIR"
             printf 'DOCKERHUB_USERNAME=%s\nIMAGE_NAME=%s\nHOST_PORT=%s\nCONTAINER_NAME=%s\n' "$DOCKERHUB_USERNAME" "$IMAGE_NAME" "$HOST_PORT" "$CONTAINER_NAME" > .env
             docker compose pull
-            docker compose up -d --remove-orphans
+            docker compose up -d --remove-orphans --wait --wait-timeout 60
             docker compose ps
             test "$(docker inspect -f '{{.State.Health.Status}}' tanetpon-student-work-log)" = healthy
