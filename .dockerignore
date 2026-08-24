@@ -3,3 +3,5 @@
 .env
 npm-data
 npm-letsencrypt
+node_modules
+data

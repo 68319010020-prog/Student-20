@@ -3,6 +3,11 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tanetpon-production
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -84,3 +89,4 @@ jobs:
             docker compose pull
             docker compose up -d --remove-orphans
             docker compose ps
+            test "$(docker inspect -f '{{.State.Health.Status}}' tanetpon-student-work-log)" = healthy
