@@ -12,10 +12,10 @@
 - `SSH_PORT`: `22210`
 - `SSH_USER`: `vps01`
 - `SSH_PRIVATE_KEY`: เนื้อหา private key ของตัวเองจาก `~/.ssh/vps01_deploy`
-- `DOCKERHUB_USERNAME`: Docker Hub username ของตัวเอง
+- `DOCKERHUB_USERNAME`: `ponlpon`
 - `DOCKERHUB_TOKEN`: Docker Hub access token ของตัวเอง
 
-โปรเจกต์นี้กำหนดค่าประจำตัวไว้แล้ว: โฟลเดอร์ `~/apps/tanetpon/`, พอร์ต `30020`, container `tanetpon-student-work-log`, image `tanetpon/student-work-log:latest`
+โปรเจกต์นี้กำหนดค่าประจำตัวไว้แล้ว: โฟลเดอร์ `~/apps/tanetpon/`, พอร์ต `30020`, container `tanetpon-student-work-log`, image `ponlpon/student-work-log:latest`
 
 ## Onboarding SSH ครั้งแรก
 

@@ -1,0 +1,19 @@
+services:
+  app:
+    image: ponlpon/student-work-log:latest
+    container_name: tanetpon-student-work-log
+    restart: unless-stopped
+    ports:
+      - "30020:3000"
+    volumes:
+      - tanetpon-student-work-log-data:/app/data
+    networks:
+      - tanetpon-net
+
+volumes:
+  tanetpon-student-work-log-data:
+    name: tanetpon-student-work-log-data
+
+networks:
+  tanetpon-net:
+    name: tanetpon-net

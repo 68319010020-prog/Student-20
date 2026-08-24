@@ -1,0 +1,86 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ponlpon/student-work-log:latest
+
+      - name: Prepare deploy directory
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_NAME: tanetpon
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DEPLOY_NAME
+          script: |
+            set -eu
+            case "$DEPLOY_NAME" in
+              ''|*[!a-zA-Z0-9_-]*) echo 'Invalid DEPLOY_NAME'; exit 1 ;;
+            esac
+            mkdir -p "$HOME/apps/$DEPLOY_NAME"
+
+      - name: Upload compose file
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: docker-compose.yml
+          target: ~/apps/tanetpon
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_NAME: tanetpon
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          IMAGE_NAME: ${{ github.event.repository.name }}
+          HOST_PORT: 30020
+          CONTAINER_NAME: tanetpon-student-work-log
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DEPLOY_NAME,DOCKERHUB_USERNAME,IMAGE_NAME,HOST_PORT,CONTAINER_NAME
+          script: |
+            set -eu
+            case "$DEPLOY_NAME" in
+              ''|*[!a-zA-Z0-9_-]*) echo 'Invalid DEPLOY_NAME'; exit 1 ;;
+            esac
+            case "$HOST_PORT" in
+              300[0-9][0-9]) ;;
+              *) echo 'HOST_PORT must be 30000-30099'; exit 1 ;;
+            esac
+            DEPLOY_DIR="$HOME/apps/$DEPLOY_NAME"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            printf 'DOCKERHUB_USERNAME=%s\nIMAGE_NAME=%s\nHOST_PORT=%s\nCONTAINER_NAME=%s\n' "$DOCKERHUB_USERNAME" "$IMAGE_NAME" "$HOST_PORT" "$CONTAINER_NAME" > .env
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker compose ps
