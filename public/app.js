@@ -62,16 +62,66 @@ function openForm(item) {
   dialog.showModal(); document.querySelector('#titleInput').focus();
 }
 
-function showWorkspace(user) { authView.hidden = true; appShell.hidden = false; document.querySelector('#logoutButton').hidden = false; document.querySelector('#userName').hidden = false; document.querySelector('#userName').textContent = user.username; loadAssignments().catch(showAuthError); }
+function showWorkspace(user) {
+  authView.hidden = true;
+  appShell.hidden = false;
+  document.querySelector('#logoutButton').hidden = false;
+  document.querySelector('#userName').hidden = false;
+  document.querySelector('#userName').textContent = user.username;
+  loadAssignments().catch(showAuthError);
+}
+
+function showAuthView() {
+  authView.hidden = false;
+  appShell.hidden = true;
+  document.querySelector('#logoutButton').hidden = true;
+  document.querySelector('#userName').hidden = true;
+  document.querySelector('#userName').textContent = '';
+  document.querySelector('#authError').textContent = '';
+}
+
+function finalizeAuthSuccess(user) {
+  const authForm = document.querySelector('#authForm');
+  authForm.reset();
+  authForm.dataset.register = 'false';
+  document.querySelector('#confirmPasswordLabel').hidden = true;
+  document.querySelector('#authConfirmPassword').required = false;
+  authForm.querySelector('button[type="submit"]').innerHTML = '<span>→</span>เข้าสู่ระบบ';
+  document.querySelector('#registerButton').textContent = 'ยังไม่มีบัญชี? สร้างบัญชีใหม่';
+  showWorkspace(user);
+}
+
 function showAuthError(error) { document.querySelector('#authError').textContent = error.message; }
-async function checkSession() { try { const user = await request('/api/me'); showWorkspace(user); } catch { authView.hidden = false; appShell.hidden = true; document.querySelector('#logoutButton').hidden = true; } }
+async function checkSession() {
+  try {
+    const user = await request('/api/me');
+    showWorkspace(user);
+  } catch {
+    showAuthView();
+  }
+}
 
 document.querySelector('#authForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const isRegistering = event.target.dataset.register === 'true';
   const button = event.target.querySelector('button[type="submit"]');
   button.disabled = true; document.querySelector('#authError').textContent = '';
-  try { const user = await request(`/api/${isRegistering ? 'register' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.querySelector('#authUsername').value, password: document.querySelector('#authPassword').value, confirm_password: document.querySelector('#authConfirmPassword').value }) }); showWorkspace(user); } catch (error) { showAuthError(error); } finally { button.disabled = false; }
+  try {
+    const user = await request(`/api/${isRegistering ? 'register' : 'login'}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.querySelector('#authUsername').value,
+        password: document.querySelector('#authPassword').value,
+        confirm_password: document.querySelector('#authConfirmPassword').value
+      })
+    });
+    finalizeAuthSuccess(user);
+  } catch (error) {
+    showAuthError(error);
+  } finally {
+    button.disabled = false;
+  }
 });
 document.querySelector('#registerButton').addEventListener('click', (event) => { const authForm = document.querySelector('#authForm'); const registering = authForm.dataset.register === 'true'; authForm.dataset.register = String(!registering); document.querySelector('#confirmPasswordLabel').hidden = registering; document.querySelector('#authConfirmPassword').required = !registering; authForm.querySelector('button[type="submit"]').innerHTML = registering ? '<span>→</span>เข้าสู่ระบบ' : '<span>+</span>สร้างบัญชี'; event.currentTarget.textContent = registering ? 'ยังไม่มีบัญชี? สร้างบัญชีใหม่' : 'มีบัญชีแล้ว? เข้าสู่ระบบ'; authForm.reset(); document.querySelector('#authError').textContent = ''; });
 document.querySelector('#logoutButton').addEventListener('click', async () => { await request('/api/logout', { method: 'POST' }); window.location.reload(); });
@@ -82,4 +132,8 @@ document.querySelector('#cancelButton').addEventListener('click', () => dialog.c
 document.querySelector('#searchInput').addEventListener('input', (event) => { state.search = event.target.value; render(); });
 document.querySelectorAll('.filter').forEach((button) => button.addEventListener('click', () => { document.querySelector('.filter.active').classList.remove('active'); button.classList.add('active'); state.filter = button.dataset.filter; render(); }));
 list.addEventListener('click', async (event) => { const id = Number(event.target.dataset.id); if (!id) return; const item = state.assignments.find((assignment) => assignment.id === id); if (event.target.classList.contains('edit-button')) openForm(item); if (event.target.classList.contains('delete-button') && confirm(`ลบงาน “${item.title}” ใช่ไหม`)) { await request(`/api/assignments/${id}`, { method: 'DELETE' }); await loadAssignments(); } });
-const now = new Date(); document.querySelector('#todayDate').textContent = new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }).format(now); checkSession();
+const now = new Date();
+document.querySelector('#todayDate').textContent = new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+appShell.hidden = true;
+authView.hidden = false;
+if (document.cookie.includes('student_session=')) { checkSession(); } else { showAuthView(); }

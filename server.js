@@ -20,6 +20,22 @@ function defaultState() {
   return { users: [], assignments: [] };
 }
 
+function ensureDemoAccount() {
+  const demoUsername = 'admin';
+  const demoPassword = 'admin123';
+
+  if (!getUserByName(demoUsername)) {
+    state.users.push({
+      id: nextId(state.users),
+      username: demoUsername,
+      password_hash: passwordHash(demoPassword),
+      created_at: new Date().toISOString(),
+      is_demo: true
+    });
+    saveState();
+  }
+}
+
 function loadState() {
   try {
     const raw = fs.readFileSync(dataFile, 'utf8');
@@ -36,6 +52,7 @@ function loadState() {
 }
 
 let state = loadState();
+ensureDemoAccount();
 
 function saveState() {
   fs.writeFileSync(dataFile, JSON.stringify(state, null, 2));
@@ -279,7 +296,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/{*splat}', (req, res) => {
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
