@@ -1,6 +1,19 @@
-const state = { assignments: [], filter: 'all', search: '', lastUpdated: null };
+const state = {
+  assignments: [],
+  filter: 'all',
+  search: '',
+  lastUpdated: null,
+  view: 'list',
+  calendarMonth: new Date().getMonth(),
+  calendarYear: new Date().getFullYear(),
+  dragTargetId: null,
+};
 const labels = { todo: 'ยังไม่เริ่ม', doing: 'กำลังทำ', done: 'เสร็จแล้ว' };
 const list = document.querySelector('#assignmentList');
+const listView = document.querySelector('#listView');
+const calendarView = document.querySelector('#calendarView');
+const calendarDays = document.querySelector('#calendarDays');
+const calendarMonthLabel = document.querySelector('#calendarMonthLabel');
 const dialog = document.querySelector('#assignmentDialog');
 const form = document.querySelector('#assignmentForm');
 const authView = document.querySelector('#authView');
@@ -41,8 +54,14 @@ async function request(url, options) {
   return body;
 }
 
-function render() {
-  const visible = state.assignments.filter(item => {
+function getOrderedAssignments() {
+  const order = [...state.assignments].sort((a, b) => Number(a.id) - Number(b.id));
+  return order;
+}
+
+function getVisibleAssignments() {
+  const ordered = getOrderedAssignments();
+  return ordered.filter(item => {
     const matchesFilter = state.filter === 'all' || item.status === state.filter;
     const query = state.search.toLowerCase();
     return (
@@ -50,6 +69,54 @@ function render() {
       (!query || `${item.title} ${item.subject} ${item.notes}`.toLowerCase().includes(query))
     );
   });
+}
+
+function renderCalendar() {
+  if (!calendarDays) return;
+
+  const monthStart = new Date(state.calendarYear, state.calendarMonth, 1);
+  const monthEnd = new Date(state.calendarYear, state.calendarMonth + 1, 0);
+  const firstWeekday = monthStart.getDay();
+  const daysInMonth = monthEnd.getDate();
+  const monthLabel = new Intl.DateTimeFormat('th-TH', {
+    month: 'long',
+    year: 'numeric',
+  }).format(monthStart);
+
+  calendarMonthLabel.textContent = monthLabel;
+  calendarDays.innerHTML = '';
+
+  for (let index = 0; index < firstWeekday; index += 1) {
+    const spacer = document.createElement('div');
+    spacer.className = 'calendar-cell is-empty';
+    calendarDays.appendChild(spacer);
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const cell = document.createElement('div');
+    const dateKey = `${state.calendarYear}-${String(state.calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const matches = state.assignments.filter(item => item.due_date === dateKey);
+
+    cell.className = 'calendar-cell';
+    cell.dataset.date = dateKey;
+    cell.innerHTML = `
+      <div class="calendar-day-number">${day}</div>
+      <div class="calendar-day-items">
+        ${matches
+          .slice(0, 2)
+          .map(
+            item => `<span class="calendar-task ${item.status}">${escapeHtml(item.title)}</span>`
+          )
+          .join('')}
+        ${matches.length > 2 ? `<span class="calendar-more">+${matches.length - 2}</span>` : ''}
+      </div>
+    `;
+    calendarDays.appendChild(cell);
+  }
+}
+
+function render() {
+  const visible = getVisibleAssignments();
 
   if (appVersion) {
     appVersion.textContent = 'v1.1';
@@ -71,7 +138,7 @@ function render() {
   list.innerHTML = visible.length
     ? visible
         .map(
-          item => `<article class="assignment ${item.status}">
+          item => `<article class="assignment ${item.status}" draggable="true" data-id="${item.id}">
     <div class="assignment-bar"></div><div class="assignment-main"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.subject)}${item.notes ? ` · ${escapeHtml(item.notes)}` : ''}</p></div>
     <div class="assignment-meta"><span class="badge">${labels[item.status]}</span>${item.priority === 'high' ? '<span class="priority-badge">สำคัญมาก</span>' : item.priority === 'low' ? '<span class="priority-badge low">ไว้ทีหลัง</span>' : ''}<span class="due ${item.due_date && item.status !== 'done' && item.due_date < new Date().toISOString().slice(0, 10) ? 'overdue' : ''}">${formatDate(item.due_date)}</span><div class="actions"><button class="icon-button edit-button" data-id="${item.id}" aria-label="แก้ไข">✎</button><button class="icon-button delete-button" data-id="${item.id}" aria-label="ลบ">×</button></div></div>
   </article>`
@@ -91,12 +158,47 @@ function render() {
     : 'อัปเดตล่าสุด';
   document.querySelector('#listHint').textContent =
     `${visible.length} รายการที่แสดง · อัปเดตอัตโนมัติเมื่อบันทึก`;
+
+  renderCalendar();
+  listView.classList.toggle('hidden', state.view !== 'list');
+  calendarView.classList.toggle('hidden', state.view !== 'calendar');
+  document.querySelectorAll('.view-button').forEach(button => {
+    button.classList.toggle('active', button.dataset.view === state.view);
+  });
 }
 
 async function loadAssignments() {
   state.assignments = await request('/api/assignments');
   state.lastUpdated = new Date().toISOString();
   render();
+}
+
+function exportAssignments() {
+  const csvRows = [['title', 'subject', 'status', 'priority', 'due_date', 'notes']];
+  state.assignments.forEach(item => {
+    csvRows.push([
+      item.title,
+      item.subject,
+      item.status,
+      item.priority,
+      item.due_date || '',
+      item.notes || '',
+    ]);
+  });
+
+  const csvContent = csvRows
+    .map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'student-work-log.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 function openForm(item) {
   form.reset();
@@ -112,8 +214,11 @@ function openForm(item) {
 }
 
 function showWorkspace(user) {
+  authView.classList.remove('is-exiting');
   authView.hidden = true;
   appShell.hidden = false;
+  appShell.classList.remove('is-hidden');
+  appShell.classList.add('is-visible');
   document.querySelector('#logoutButton').hidden = false;
   document.querySelector('#userName').hidden = false;
   document.querySelector('#userName').textContent = user.username;
@@ -121,8 +226,13 @@ function showWorkspace(user) {
 }
 
 function showAuthView() {
-  authView.hidden = false;
+  appShell.classList.remove('is-visible');
   appShell.hidden = true;
+  authView.hidden = false;
+  authView.classList.remove('is-exiting');
+  requestAnimationFrame(() => {
+    authView.classList.add('is-visible');
+  });
   document.querySelector('#logoutButton').hidden = true;
   document.querySelector('#userName').hidden = true;
   document.querySelector('#userName').textContent = '';
@@ -137,7 +247,8 @@ function finalizeAuthSuccess(user) {
   document.querySelector('#authConfirmPassword').required = false;
   authForm.querySelector('button[type="submit"]').innerHTML = '<span>→</span>เข้าสู่ระบบ';
   document.querySelector('#registerButton').textContent = 'ยังไม่มีบัญชี? สร้างบัญชีใหม่';
-  showWorkspace(user);
+  authView.classList.add('is-exiting');
+  setTimeout(() => showWorkspace(user), 180);
 }
 
 function showAuthError(error) {
@@ -211,6 +322,35 @@ form.addEventListener('submit', async event => {
   }
 });
 document.querySelector('#addButton').addEventListener('click', () => openForm());
+
+document.querySelector('#exportButton').addEventListener('click', exportAssignments);
+
+document.querySelector('#calendarPrev').addEventListener('click', () => {
+  state.calendarMonth -= 1;
+  if (state.calendarMonth < 0) {
+    state.calendarMonth = 11;
+    state.calendarYear -= 1;
+  }
+  renderCalendar();
+});
+
+document.querySelector('#calendarNext').addEventListener('click', () => {
+  state.calendarMonth += 1;
+  if (state.calendarMonth > 11) {
+    state.calendarMonth = 0;
+    state.calendarYear += 1;
+  }
+  renderCalendar();
+});
+
+document.querySelector('.view-button[data-view="list"]').addEventListener('click', () => {
+  state.view = 'list';
+  render();
+});
+document.querySelector('.view-button[data-view="calendar"]').addEventListener('click', () => {
+  state.view = 'calendar';
+  render();
+});
 document.querySelector('#closeButton').addEventListener('click', () => dialog.close());
 document.querySelector('#cancelButton').addEventListener('click', () => dialog.close());
 document.querySelector('#searchInput').addEventListener('input', event => {
@@ -235,6 +375,47 @@ list.addEventListener('click', async event => {
     await loadAssignments();
   }
 });
+
+list.addEventListener('dragstart', event => {
+  const card = event.target.closest('.assignment');
+  if (!card) return;
+  state.dragTargetId = Number(card.dataset.id);
+  event.dataTransfer.effectAllowed = 'move';
+});
+
+list.addEventListener('dragover', event => {
+  const card = event.target.closest('.assignment');
+  if (!card) return;
+  event.preventDefault();
+  card.classList.add('is-drop-target');
+});
+
+list.addEventListener('dragleave', event => {
+  const card = event.target.closest('.assignment');
+  if (card) card.classList.remove('is-drop-target');
+});
+
+list.addEventListener('drop', event => {
+  const card = event.target.closest('.assignment');
+  if (!card || state.dragTargetId === null) return;
+  event.preventDefault();
+  const targetId = Number(card.dataset.id);
+  if (targetId === state.dragTargetId) return;
+
+  const current = [...state.assignments];
+  const sourceIndex = current.findIndex(item => Number(item.id) === state.dragTargetId);
+  const targetIndex = current.findIndex(item => Number(item.id) === targetId);
+
+  if (sourceIndex < 0 || targetIndex < 0) return;
+
+  const [moved] = current.splice(sourceIndex, 1);
+  current.splice(targetIndex, 0, moved);
+  state.assignments = current;
+  state.dragTargetId = null;
+  list.querySelectorAll('.assignment').forEach(item => item.classList.remove('is-drop-target'));
+  render();
+});
+
 const now = new Date();
 document.querySelector('#todayDate').textContent = new Intl.DateTimeFormat('th-TH', {
   day: 'numeric',
@@ -243,6 +424,7 @@ document.querySelector('#todayDate').textContent = new Intl.DateTimeFormat('th-T
 }).format(now);
 appShell.hidden = true;
 authView.hidden = false;
+authView.classList.add('is-visible');
 if (document.cookie.includes('student_session=')) {
   checkSession();
 } else {

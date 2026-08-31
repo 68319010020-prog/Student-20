@@ -94,9 +94,16 @@
             <h2>รายการงาน</h2>
             <p id="listHint">กำลังโหลดรายการ...</p>
           </div>
-          <button class="primary-button" id="addButton" type="button">
-            <span>+</span> เพิ่มงานใหม่
-          </button>
+          <div class="toolbar-actions">
+            <button class="secondary-button" id="exportButton" type="button">Export CSV</button>
+            <div class="view-switcher" role="tablist" aria-label="โหมดดูงาน">
+              <button class="view-button active" data-view="list" type="button">List</button>
+              <button class="view-button" data-view="calendar" type="button">Calendar</button>
+            </div>
+            <button class="primary-button" id="addButton" type="button">
+              <span>+</span> เพิ่มงานใหม่
+            </button>
+          </div>
         </div>
         <div class="filters">
           <label class="search"
@@ -110,7 +117,26 @@
             ><button class="filter" data-filter="done" type="button">เสร็จแล้ว</button>
           </div>
         </div>
-        <div id="assignmentList" class="assignment-list"></div>
+        <div id="listView" class="list-view">
+          <div id="assignmentList" class="assignment-list"></div>
+        </div>
+        <div id="calendarView" class="calendar-view hidden" aria-live="polite">
+          <div class="calendar-toolbar">
+            <button class="secondary-button" id="calendarPrev" type="button">ก่อนหน้า</button>
+            <h3 id="calendarMonthLabel">เดือนนี้</h3>
+            <button class="secondary-button" id="calendarNext" type="button">ถัดไป</button>
+          </div>
+          <div class="calendar-grid">
+            <div class="calendar-head">อา</div>
+            <div class="calendar-head">จ</div>
+            <div class="calendar-head">อ</div>
+            <div class="calendar-head">พ</div>
+            <div class="calendar-head">พฤ</div>
+            <div class="calendar-head">ศ</div>
+            <div class="calendar-head">ส</div>
+            <div id="calendarDays" class="calendar-days"></div>
+          </div>
+        </div>
       </section>
     </main>
 
