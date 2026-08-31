@@ -5,10 +5,10 @@
   "description": "Clean student assignment tracker for the CI/CD training server",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "dependencies": {
-    "better-sqlite3": "^11.10.0",
     "express": "^5.1.0"
   }
 }

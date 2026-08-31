@@ -1,4 +1,4 @@
-const state = { assignments: [], filter: 'all', search: '' };
+const state = { assignments: [], filter: 'all', search: '', lastUpdated: null };
 const labels = { todo: 'ยังไม่เริ่ม', doing: 'กำลังทำ', done: 'เสร็จแล้ว' };
 const list = document.querySelector('#assignmentList');
 const dialog = document.querySelector('#assignmentDialog');
@@ -8,6 +8,7 @@ const appShell = document.querySelector('#appShell');
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
 const formatDate = (value) => value ? new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`)) : 'ไม่ระบุวันส่ง';
+const formatTime = (value) => value ? new Intl.DateTimeFormat('th-TH', { hour: 'numeric', minute: '2-digit' }).format(new Date(value)) : 'เมื่อสักครู่';
 
 async function request(url, options) {
   const response = await fetch(url, options);
@@ -22,22 +23,34 @@ function render() {
     const query = state.search.toLowerCase();
     return matchesFilter && (!query || `${item.title} ${item.subject} ${item.notes}`.toLowerCase().includes(query));
   });
-  list.innerHTML = visible.length ? visible.map((item) => `<article class="assignment ${item.status}">
-    <div class="assignment-bar"></div><div class="assignment-main"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.subject)}${item.notes ? ` · ${escapeHtml(item.notes)}` : ''}</p></div>
-    <div class="assignment-meta"><span class="badge">${labels[item.status]}</span>${item.priority === 'high' ? '<span class="priority-badge">สำคัญมาก</span>' : ''}<span class="due ${item.due_date && item.status !== 'done' && item.due_date < new Date().toISOString().slice(0,10) ? 'overdue' : ''}">${formatDate(item.due_date)}</span><div class="actions"><button class="icon-button edit-button" data-id="${item.id}" aria-label="แก้ไข">✎</button><button class="icon-button delete-button" data-id="${item.id}" aria-label="ลบ">×</button></div></div>
-  </article>`).join('') : '<div class="empty"><strong>ยังไม่มีงานในมุมมองนี้</strong><span>เพิ่มงานแรกของคุณ แล้วค่อยๆ ทำให้เสร็จทีละอย่าง</span></div>';
+
   const done = state.assignments.filter((item) => item.status === 'done').length;
   const doing = state.assignments.filter((item) => item.status === 'doing').length;
+  const todo = state.assignments.filter((item) => item.status === 'todo').length;
+  const overdue = state.assignments.filter((item) => item.status !== 'done' && item.due_date && item.due_date < new Date().toISOString().slice(0, 10)).length;
   const progress = state.assignments.length ? Math.round(done / state.assignments.length * 100) : 0;
+
+  list.innerHTML = visible.length ? visible.map((item) => `<article class="assignment ${item.status}">
+    <div class="assignment-bar"></div><div class="assignment-main"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.subject)}${item.notes ? ` · ${escapeHtml(item.notes)}` : ''}</p></div>
+    <div class="assignment-meta"><span class="badge">${labels[item.status]}</span>${item.priority === 'high' ? '<span class="priority-badge">สำคัญมาก</span>' : item.priority === 'low' ? '<span class="priority-badge low">ไว้ทีหลัง</span>' : ''}<span class="due ${item.due_date && item.status !== 'done' && item.due_date < new Date().toISOString().slice(0,10) ? 'overdue' : ''}">${formatDate(item.due_date)}</span><div class="actions"><button class="icon-button edit-button" data-id="${item.id}" aria-label="แก้ไข">✎</button><button class="icon-button delete-button" data-id="${item.id}" aria-label="ลบ">×</button></div></div>
+  </article>`).join('') : '<div class="empty"><strong>ยังไม่มีงานในมุมมองนี้</strong><span>เพิ่มงานแรกของคุณ แล้วค่อยๆ ทำให้เสร็จทีละอย่าง</span></div>';
+
   document.querySelector('#totalCount').textContent = state.assignments.length;
+  document.querySelector('#todoCount').textContent = todo;
   document.querySelector('#doingCount').textContent = doing;
   document.querySelector('#doneCount').textContent = done;
   document.querySelector('#progressText').textContent = `${progress}%`;
   document.querySelector('#progressBar').style.width = `${progress}%`;
+  document.querySelector('#overdueText').textContent = `${overdue} งาน overdue`;
+  document.querySelector('#lastUpdatedText').textContent = state.lastUpdated ? `อัปเดต ${formatTime(state.lastUpdated)}` : 'อัปเดตล่าสุด';
   document.querySelector('#listHint').textContent = `${visible.length} รายการที่แสดง · อัปเดตอัตโนมัติเมื่อบันทึก`;
 }
 
-async function loadAssignments() { state.assignments = await request('/api/assignments'); render(); }
+async function loadAssignments() {
+  state.assignments = await request('/api/assignments');
+  state.lastUpdated = new Date().toISOString();
+  render();
+}
 function openForm(item) {
   form.reset(); document.querySelector('#assignmentId').value = item?.id || ''; document.querySelector('#dialogTitle').textContent = item ? 'แก้ไขงาน' : 'เพิ่มงานใหม่';
   if (item) ['title', 'subject', 'due_date', 'status', 'priority', 'notes'].forEach((field) => { document.querySelector(`#${field === 'due_date' ? 'dueDate' : field}Input`).value = item[field] || ''; });
