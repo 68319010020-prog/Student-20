@@ -6,6 +6,14 @@ const form = document.querySelector('#assignmentForm');
 const authView = document.querySelector('#authView');
 const appShell = document.querySelector('#appShell');
 const appVersion = document.querySelector('#appVersion');
+const authForm = document.querySelector('#authForm');
+const confirmPasswordLabel = document.querySelector('#confirmPasswordLabel');
+const authConfirmPassword = document.querySelector('#authConfirmPassword');
+const registerButton = document.querySelector('#registerButton');
+
+authForm.dataset.register = 'false';
+confirmPasswordLabel.hidden = true;
+authConfirmPassword.required = false;
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
 const formatDate = (value) => value ? new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`)) : 'ไม่ระบุวันส่ง';
