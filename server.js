@@ -30,7 +30,7 @@ function ensureDemoAccount() {
       username: demoUsername,
       password_hash: passwordHash(demoPassword),
       created_at: new Date().toISOString(),
-      is_demo: true
+      is_demo: true,
     });
     saveState();
   }
@@ -42,7 +42,7 @@ function loadState() {
     const parsed = JSON.parse(raw);
     return {
       users: Array.isArray(parsed.users) ? parsed.users : [],
-      assignments: Array.isArray(parsed.assignments) ? parsed.assignments : []
+      assignments: Array.isArray(parsed.assignments) ? parsed.assignments : [],
     };
   } catch {
     const fresh = defaultState();
@@ -70,8 +70,12 @@ function sortAssignments(list) {
     const bPriority = order[b.priority] ?? 1;
     if (aPriority !== bPriority) return aPriority - bPriority;
 
-    const aDue = a.due_date ? new Date(`${a.due_date}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER;
-    const bDue = b.due_date ? new Date(`${b.due_date}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER;
+    const aDue = a.due_date
+      ? new Date(`${a.due_date}T00:00:00`).getTime()
+      : Number.MAX_SAFE_INTEGER;
+    const bDue = b.due_date
+      ? new Date(`${b.due_date}T00:00:00`).getTime()
+      : Number.MAX_SAFE_INTEGER;
     if (aDue !== bDue) return aDue - bDue;
     return Number(b.id) - Number(a.id);
   });
@@ -79,19 +83,21 @@ function sortAssignments(list) {
 
 function getUserByName(username) {
   const target = String(username || '').trim();
-  return state.users.find((user) => user.username.toLowerCase() === target.toLowerCase());
+  return state.users.find(user => user.username.toLowerCase() === target.toLowerCase());
 }
 
 function getUserById(id) {
-  return state.users.find((user) => Number(user.id) === Number(id));
+  return state.users.find(user => Number(user.id) === Number(id));
 }
 
 function getAssignmentsForUser(userId) {
-  return sortAssignments(state.assignments.filter((item) => Number(item.user_id) === Number(userId)));
+  return sortAssignments(state.assignments.filter(item => Number(item.user_id) === Number(userId)));
 }
 
 function getAssignmentById(id, userId) {
-  return state.assignments.find((item) => Number(item.id) === Number(id) && Number(item.user_id) === Number(userId));
+  return state.assignments.find(
+    item => Number(item.id) === Number(id) && Number(item.user_id) === Number(userId)
+  );
 }
 
 function encode(value) {
@@ -99,13 +105,22 @@ function encode(value) {
 }
 
 function createSession(user) {
-  const payload = encode(JSON.stringify({ id: user.id, username: user.username, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }));
+  const payload = encode(
+    JSON.stringify({
+      id: user.id,
+      username: user.username,
+      exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    })
+  );
   const signature = crypto.createHmac('sha256', sessionSecret).update(payload).digest('base64url');
   return `${payload}.${signature}`;
 }
 
 function readCookie(header, name) {
-  const cookie = (header || '').split(';').map((part) => part.trim()).find((part) => part.startsWith(`${name}=`));
+  const cookie = (header || '')
+    .split(';')
+    .map(part => part.trim())
+    .find(part => part.startsWith(`${name}=`));
   return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : null;
 }
 
@@ -115,7 +130,11 @@ function userFromRequest(req) {
   const [payload, signature] = token.split('.');
   if (!payload || !signature) return null;
   const expected = crypto.createHmac('sha256', sessionSecret).update(payload).digest('base64url');
-  if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  if (
+    signature.length !== expected.length ||
+    !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+  )
+    return null;
 
   try {
     const session = JSON.parse(Buffer.from(payload, 'base64url').toString());
@@ -133,7 +152,10 @@ function requireUser(req, res, next) {
 
 function setSessionCookie(res, token) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', `student_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${secure}`);
+  res.setHeader(
+    'Set-Cookie',
+    `student_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${secure}`
+  );
 }
 
 function passwordHash(password) {
@@ -146,7 +168,10 @@ function passwordMatches(password, stored) {
   const [, salt, expected] = stored.split(':');
   if (!salt || !expected) return false;
   const actual = crypto.scryptSync(password, salt, 64).toString('hex');
-  return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+  return (
+    actual.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected))
+  );
 }
 
 function validateAssignment(input) {
@@ -165,7 +190,9 @@ function validateAssignment(input) {
     due_date: input.due_date ? String(input.due_date).slice(0, 10) : null,
     status,
     priority,
-    notes: String(input.notes || '').trim().slice(0, 500)
+    notes: String(input.notes || '')
+      .trim()
+      .slice(0, 500),
   };
 }
 
@@ -179,7 +206,7 @@ app.get('/api/health', (req, res) => {
     name: 'student-work-log',
     users: state.users.length,
     assignments: state.assignments.length,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -195,10 +222,15 @@ app.get('/api/dashboard', requireUser, (req, res) => {
   const tasks = getAssignmentsForUser(req.user.id);
   res.json({
     total: tasks.length,
-    todo: tasks.filter((item) => item.status === 'todo').length,
-    doing: tasks.filter((item) => item.status === 'doing').length,
-    done: tasks.filter((item) => item.status === 'done').length,
-    overdue: tasks.filter((item) => item.status !== 'done' && item.due_date && item.due_date < new Date().toISOString().slice(0, 10)).length
+    todo: tasks.filter(item => item.status === 'todo').length,
+    doing: tasks.filter(item => item.status === 'doing').length,
+    done: tasks.filter(item => item.status === 'done').length,
+    overdue: tasks.filter(
+      item =>
+        item.status !== 'done' &&
+        item.due_date &&
+        item.due_date < new Date().toISOString().slice(0, 10)
+    ).length,
   });
 });
 
@@ -207,8 +239,10 @@ app.post('/api/register', (req, res) => {
   const password = String(req.body.password || '');
   const confirmPassword = String(req.body.confirm_password || '');
 
-  if (!/^[a-zA-Z0-9_ก-๙-]{3,30}$/.test(username)) return res.status(400).json({ error: 'ชื่อผู้ใช้ต้องยาว 3-30 ตัวอักษร' });
-  if (password.length < 6) return res.status(400).json({ error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' });
+  if (!/^[a-zA-Z0-9_ก-๙-]{3,30}$/.test(username))
+    return res.status(400).json({ error: 'ชื่อผู้ใช้ต้องยาว 3-30 ตัวอักษร' });
+  if (password.length < 6)
+    return res.status(400).json({ error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' });
   if (password !== confirmPassword) return res.status(400).json({ error: 'รหัสผ่านไม่ตรงกัน' });
   if (getUserByName(username)) return res.status(409).json({ error: 'ชื่อผู้ใช้นี้ถูกใช้แล้ว' });
 
@@ -216,7 +250,7 @@ app.post('/api/register', (req, res) => {
     id: nextId(state.users),
     username,
     password_hash: passwordHash(password),
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 
   state.users.push(user);
@@ -255,7 +289,7 @@ app.post('/api/assignments', requireUser, (req, res) => {
     id: nextId(state.assignments),
     user_id: req.user.id,
     created_at: new Date().toISOString(),
-    ...assignment
+    ...assignment,
   };
 
   state.assignments.push(newAssignment);
@@ -272,11 +306,11 @@ app.put('/api/assignments/:id', requireUser, (req, res) => {
   const target = getAssignmentById(id, req.user.id);
   if (!target) return res.status(404).json({ error: 'ไม่พบงานนี้' });
 
-  state.assignments = state.assignments.map((item) => (
+  state.assignments = state.assignments.map(item =>
     Number(item.id) === Number(id) && Number(item.user_id) === Number(req.user.id)
       ? { ...item, ...assignment }
       : item
-  ));
+  );
 
   saveState();
   res.json(getAssignmentById(id, req.user.id));
@@ -287,7 +321,9 @@ app.delete('/api/assignments/:id', requireUser, (req, res) => {
   const existed = getAssignmentById(id, req.user.id);
   if (!existed) return res.status(404).json({ error: 'ไม่พบงานนี้' });
 
-  state.assignments = state.assignments.filter((item) => !(Number(item.id) === Number(id) && Number(item.user_id) === Number(req.user.id)));
+  state.assignments = state.assignments.filter(
+    item => !(Number(item.id) === Number(id) && Number(item.user_id) === Number(req.user.id))
+  );
   saveState();
   res.status(204).end();
 });

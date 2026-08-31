@@ -5,6 +5,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 
+RUN apk add --no-cache curl
+
 COPY server.js ./
 COPY public ./public
 RUN mkdir -p /app/data

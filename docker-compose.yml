@@ -11,11 +11,11 @@ services:
       DATA_DIR: /app/data
       NODE_ENV: production
     ports:
-      - "30022:3000"
+      - '30022:3000'
     volumes:
       - tanetpon-student-work-log-data:/app/data
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 5s
       retries: 3

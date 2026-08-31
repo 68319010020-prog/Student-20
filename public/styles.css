@@ -21,44 +21,61 @@
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
   min-height: 100vh;
   background:
     radial-gradient(circle at top right, rgba(92, 180, 255, 0.16), transparent 22%),
-    radial-gradient(circle at bottom left, rgba(91, 192, 184, 0.12), transparent 26%),
-    var(--bg);
+    radial-gradient(circle at bottom left, rgba(91, 192, 184, 0.12), transparent 26%), var(--bg);
   color: var(--ink);
 }
 
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 28px 28px;
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent 82%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent 82%);
 }
 
-button, input, textarea, select {
+button,
+input,
+textarea,
+select {
   font: inherit;
 }
 
-button { cursor: pointer; }
-
-input, textarea, select {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.02);
-  color: var(--ink);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+button {
+  cursor: pointer;
 }
 
-input:focus, textarea:focus, select:focus {
+input,
+textarea,
+select {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--ink);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: rgba(108, 185, 255, 0.8);
   box-shadow: 0 0 0 4px rgba(108, 185, 255, 0.15);
@@ -155,7 +172,7 @@ input:focus, textarea:focus, select:focus {
 
 .logout-button:hover {
   color: var(--ink);
-  border-color: rgba(255,255,255,0.25);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .auth-view {
@@ -177,7 +194,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .auth-card::after {
-  content: "";
+  content: '';
   position: absolute;
   right: -30px;
   top: -30px;
@@ -248,7 +265,10 @@ input:focus, textarea:focus, select:focus {
   color: #071a22;
   font-weight: 800;
   box-shadow: 0 12px 22px rgba(108, 185, 255, 0.22);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
 }
 
 .primary-button:hover {
@@ -304,14 +324,19 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--line);
   border-radius: 26px;
   background: linear-gradient(135deg, rgba(22, 27, 33, 0.9), rgba(17, 21, 27, 0.95));
-  box-shadow: 0 18px 36px rgba(0,0,0,0.18);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
 }
 
 .intro::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, rgba(108, 185, 255, 0.08), transparent 45%, rgba(91, 192, 184, 0.08));
+  background: linear-gradient(
+    120deg,
+    rgba(108, 185, 255, 0.08),
+    transparent 45%,
+    rgba(91, 192, 184, 0.08)
+  );
 }
 
 .intro > * {
@@ -322,7 +347,7 @@ input:focus, textarea:focus, select:focus {
 .intro h1 {
   margin: 0;
   font-size: clamp(3rem, 6vw, 5.1rem);
-  line-height: .96;
+  line-height: 0.96;
   letter-spacing: -0.05em;
 }
 
@@ -343,9 +368,9 @@ input:focus, textarea:focus, select:focus {
 .date-card {
   min-width: 170px;
   padding: 18px 20px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .date-card span,
@@ -371,25 +396,42 @@ input:focus, textarea:focus, select:focus {
   margin-top: 30px;
 }
 
-.stat, .progress-stat {
+.stat,
+.progress-stat {
   padding: 22px 20px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(21, 26, 33, 0.9);
-  box-shadow: 0 14px 28px rgba(0,0,0,0.12);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
 }
 
-.stat span, .progress-label span {
+.stat span,
+.progress-label span {
   color: var(--muted);
   font-size: 12px;
 }
 
-.stat strong { display: block; margin-top: 12px; font-size: clamp(1.8rem, 3vw, 2.7rem); letter-spacing: -0.05em; }
-.stat:nth-child(1) strong { color: var(--blue); }
-.stat:nth-child(2) strong { color: var(--yellow); }
-.stat:nth-child(3) strong { color: var(--coral); }
-.stat.accent { background: linear-gradient(135deg, rgba(108, 185, 255, 0.12), rgba(21, 26, 33, 0.9)); }
-.stat.accent strong { color: var(--green); }
+.stat strong {
+  display: block;
+  margin-top: 12px;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  letter-spacing: -0.05em;
+}
+.stat:nth-child(1) strong {
+  color: var(--blue);
+}
+.stat:nth-child(2) strong {
+  color: var(--yellow);
+}
+.stat:nth-child(3) strong {
+  color: var(--coral);
+}
+.stat.accent {
+  background: linear-gradient(135deg, rgba(108, 185, 255, 0.12), rgba(21, 26, 33, 0.9));
+}
+.stat.accent strong {
+  color: var(--green);
+}
 
 .progress-stat {
   grid-column: span 1;
@@ -415,7 +457,7 @@ input:focus, textarea:focus, select:focus {
   margin-top: 16px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .progress-track div {
@@ -424,7 +466,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--blue), var(--green), #8dd9d0);
   box-shadow: 0 0 16px rgba(108, 185, 255, 0.4);
-  transition: width .35s ease;
+  transition: width 0.35s ease;
 }
 
 .mini-meta {
@@ -440,7 +482,8 @@ input:focus, textarea:focus, select:focus {
   margin-top: 52px;
 }
 
-.toolbar, .filters {
+.toolbar,
+.filters {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -479,7 +522,7 @@ input:focus, textarea:focus, select:focus {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .search span {
@@ -521,8 +564,8 @@ input:focus, textarea:focus, select:focus {
 
 .filter:not(.active):hover {
   color: var(--ink);
-  border-color: rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .assignment-list {
@@ -541,13 +584,15 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(21, 26, 33, 0.92);
-  box-shadow: 0 14px 24px rgba(0,0,0,0.12);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .assignment:hover {
   transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.14);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .assignment-bar {
@@ -556,8 +601,12 @@ input:focus, textarea:focus, select:focus {
   background: var(--coral);
 }
 
-.assignment.doing .assignment-bar { background: var(--yellow); }
-.assignment.done .assignment-bar { background: var(--green); }
+.assignment.doing .assignment-bar {
+  background: var(--yellow);
+}
+.assignment.done .assignment-bar {
+  background: var(--green);
+}
 
 .assignment-main h3 {
   margin: 0;
@@ -577,7 +626,8 @@ input:focus, textarea:focus, select:focus {
   gap: 12px;
 }
 
-.badge, .priority-badge {
+.badge,
+.priority-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -589,7 +639,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .badge {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
 }
 
@@ -637,8 +687,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 .icon-button:hover {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.07);
   color: var(--ink);
 }
 
@@ -650,9 +700,9 @@ input:focus, textarea:focus, select:focus {
 
 .empty {
   padding: 48px 20px;
-  border: 1px dashed rgba(255,255,255,0.12);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
   border-radius: 18px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   color: var(--muted);
   text-align: center;
 }
@@ -669,7 +719,7 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: rgba(17, 22, 27, 0.96);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.42);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
 }
 
 #assignmentDialog::backdrop {
@@ -776,7 +826,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

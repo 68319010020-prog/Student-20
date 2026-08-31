@@ -1,66 +1,177 @@
 <!doctype html>
 <html lang="th">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f7f2">
-  <title>สมุดงาน | Tanetpon</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="หน้าหลัก"><span class="brand-mark">T</span><span>สมุดงาน</span></a>
-    <div class="account"><span class="live-pill"><span class="live-dot"></span>ระบบพร้อมใช้งาน</span><span id="appVersion" class="version-pill">v1.1</span><span id="userName" hidden></span><button id="logoutButton" class="logout-button" type="button" hidden>ออกจากระบบ</button></div>
-  </header>
-
-  <section id="authView" class="auth-view">
-    <div class="auth-card"><p class="eyebrow">PERSONAL WORKSPACE</p><h1>สมุดงาน<br><em>ของคุณเอง</em></h1><p>เข้าสู่ระบบเพื่อเก็บงานของคุณแยกจากเพื่อนร่วมชั้น</p><form id="authForm"><label>ชื่อผู้ใช้<input id="authUsername" required minlength="3" autocomplete="username" placeholder="เช่น tanetpon"></label><label>รหัสผ่าน<input id="authPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="อย่างน้อย 6 ตัวอักษร"></label><label id="confirmPasswordLabel" hidden>ยืนยันรหัสผ่าน<input id="authConfirmPassword" type="password" minlength="6" autocomplete="new-password" placeholder="กรอกรหัสผ่านอีกครั้ง"></label><p id="authError" class="form-error"></p><button class="primary-button" type="submit"><span>→</span>เข้าสู่ระบบ</button></form><button id="registerButton" class="auth-link" type="button">ยังไม่มีบัญชี? สร้างบัญชีใหม่</button></div>
-  </section>
-
-  <main id="appShell" class="shell">
-    <section class="intro">
-      <div>
-        <p class="eyebrow">STUDENT WORKSPACE / 2026</p>
-        <h1>จัดระเบียบงาน<br><em>ให้ไปต่อได้จริง</em></h1>
-        <p class="intro-copy">พื้นที่เล็กๆ สำหรับรวมงานทุกวิชา เห็นสิ่งที่ต้องทำ และฉลองสิ่งที่เสร็จแล้ว</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f7f2" />
+    <title>สมุดงาน | Tanetpon</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="หน้าหลัก"
+        ><span class="brand-mark">T</span><span>สมุดงาน</span></a
+      >
+      <div class="account">
+        <span class="live-pill"><span class="live-dot"></span>ระบบพร้อมใช้งาน</span
+        ><span id="appVersion" class="version-pill">v1.1</span><span id="userName" hidden></span
+        ><button id="logoutButton" class="logout-button" type="button" hidden>ออกจากระบบ</button>
       </div>
-      <div class="date-card"><span id="todayLabel">วันนี้</span><strong id="todayDate">--</strong></div>
+    </header>
+
+    <section id="authView" class="auth-view">
+      <div class="auth-card">
+        <p class="eyebrow">PERSONAL WORKSPACE</p>
+        <h1>สมุดงาน<br /><em>ของคุณเอง</em></h1>
+        <p>เข้าสู่ระบบเพื่อเก็บงานของคุณแยกจากเพื่อนร่วมชั้น</p>
+        <form id="authForm">
+          <label
+            >ชื่อผู้ใช้<input
+              id="authUsername"
+              required
+              minlength="3"
+              autocomplete="username"
+              placeholder="เช่น tanetpon" /></label
+          ><label
+            >รหัสผ่าน<input
+              id="authPassword"
+              type="password"
+              required
+              minlength="6"
+              autocomplete="current-password"
+              placeholder="อย่างน้อย 6 ตัวอักษร" /></label
+          ><label id="confirmPasswordLabel" hidden
+            >ยืนยันรหัสผ่าน<input
+              id="authConfirmPassword"
+              type="password"
+              minlength="6"
+              autocomplete="new-password"
+              placeholder="กรอกรหัสผ่านอีกครั้ง"
+          /></label>
+          <p id="authError" class="form-error"></p>
+          <button class="primary-button" type="submit"><span>→</span>เข้าสู่ระบบ</button>
+        </form>
+        <button id="registerButton" class="auth-link" type="button">
+          ยังไม่มีบัญชี? สร้างบัญชีใหม่
+        </button>
+      </div>
     </section>
 
-    <section class="stats" aria-label="สรุปงาน">
-      <div class="stat"><span>งานทั้งหมด</span><strong id="totalCount">0</strong></div>
-      <div class="stat"><span>ยังไม่เริ่ม</span><strong id="todoCount">0</strong></div>
-      <div class="stat"><span>กำลังทำ</span><strong id="doingCount">0</strong></div>
-      <div class="stat accent"><span>เสร็จแล้ว</span><strong id="doneCount">0</strong></div>
-      <div class="progress-stat"><div class="progress-label"><span>ความคืบหน้า</span><strong id="progressText">0%</strong></div><div class="progress-track"><div id="progressBar"></div></div><div class="mini-meta"><span id="overdueText">0 งาน overdue</span><span id="lastUpdatedText">อัปเดตล่าสุด</span></div></div>
-    </section>
-
-    <section class="workspace">
-      <div class="toolbar">
-        <div><h2>รายการงาน</h2><p id="listHint">กำลังโหลดรายการ...</p></div>
-        <button class="primary-button" id="addButton" type="button"><span>+</span> เพิ่มงานใหม่</button>
-      </div>
-      <div class="filters">
-        <label class="search"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="ค้นหางานหรือวิชา..." /></label>
-        <div class="filter-buttons" role="group" aria-label="กรองตามสถานะ">
-          <button class="filter active" data-filter="all" type="button">ทั้งหมด</button><button class="filter" data-filter="todo" type="button">ยังไม่เริ่ม</button><button class="filter" data-filter="doing" type="button">กำลังทำ</button><button class="filter" data-filter="done" type="button">เสร็จแล้ว</button>
+    <main id="appShell" class="shell">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">STUDENT WORKSPACE / 2026</p>
+          <h1>จัดระเบียบงาน<br /><em>ให้ไปต่อได้จริง</em></h1>
+          <p class="intro-copy">
+            พื้นที่เล็กๆ สำหรับรวมงานทุกวิชา เห็นสิ่งที่ต้องทำ และฉลองสิ่งที่เสร็จแล้ว
+          </p>
         </div>
-      </div>
-      <div id="assignmentList" class="assignment-list"></div>
-    </section>
-  </main>
+        <div class="date-card">
+          <span id="todayLabel">วันนี้</span><strong id="todayDate">--</strong>
+        </div>
+      </section>
 
-  <dialog id="assignmentDialog">
-    <form id="assignmentForm" method="dialog">
-      <div class="dialog-head"><div><p class="eyebrow">NEW ENTRY</p><h2 id="dialogTitle">เพิ่มงานใหม่</h2></div><button class="icon-button" id="closeButton" type="button" aria-label="ปิด">×</button></div>
-      <input id="assignmentId" type="hidden">
-      <label>ชื่องาน<input id="titleInput" name="title" required maxlength="120" placeholder="เช่น ส่งรายงานวิทยาศาสตร์"></label>
-      <div class="form-row"><label>วิชา<input id="subjectInput" name="subject" required maxlength="80" placeholder="เช่น วิทยาศาสตร์"></label><label>กำหนดส่ง<input id="dueDateInput" name="due_date" type="date"></label></div>
-      <div class="form-row"><label>สถานะ<select id="statusInput" name="status"><option value="todo">ยังไม่เริ่ม</option><option value="doing">กำลังทำ</option><option value="done">เสร็จแล้ว</option></select></label><label>ความสำคัญ<select id="priorityInput" name="priority"><option value="normal">ปกติ</option><option value="high">สำคัญมาก</option><option value="low">ไว้ทีหลัง</option></select></label></div>
-      <label>โน้ตเพิ่มเติม<textarea id="notesInput" name="notes" rows="3" maxlength="500" placeholder="รายละเอียดสั้นๆ หรือสิ่งที่ต้องเตรียม"></textarea></label>
-      <div class="dialog-actions"><button class="text-button" id="cancelButton" type="button">ยกเลิก</button><button class="primary-button" type="submit">บันทึกงาน</button></div>
-    </form>
-  </dialog>
-  <script src="/app.js"></script>
-</body>
+      <section class="stats" aria-label="สรุปงาน">
+        <div class="stat"><span>งานทั้งหมด</span><strong id="totalCount">0</strong></div>
+        <div class="stat"><span>ยังไม่เริ่ม</span><strong id="todoCount">0</strong></div>
+        <div class="stat"><span>กำลังทำ</span><strong id="doingCount">0</strong></div>
+        <div class="stat accent"><span>เสร็จแล้ว</span><strong id="doneCount">0</strong></div>
+        <div class="progress-stat">
+          <div class="progress-label">
+            <span>ความคืบหน้า</span><strong id="progressText">0%</strong>
+          </div>
+          <div class="progress-track"><div id="progressBar"></div></div>
+          <div class="mini-meta">
+            <span id="overdueText">0 งาน overdue</span
+            ><span id="lastUpdatedText">อัปเดตล่าสุด</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="toolbar">
+          <div>
+            <h2>รายการงาน</h2>
+            <p id="listHint">กำลังโหลดรายการ...</p>
+          </div>
+          <button class="primary-button" id="addButton" type="button">
+            <span>+</span> เพิ่มงานใหม่
+          </button>
+        </div>
+        <div class="filters">
+          <label class="search"
+            ><span aria-hidden="true">⌕</span
+            ><input id="searchInput" type="search" placeholder="ค้นหางานหรือวิชา..."
+          /></label>
+          <div class="filter-buttons" role="group" aria-label="กรองตามสถานะ">
+            <button class="filter active" data-filter="all" type="button">ทั้งหมด</button
+            ><button class="filter" data-filter="todo" type="button">ยังไม่เริ่ม</button
+            ><button class="filter" data-filter="doing" type="button">กำลังทำ</button
+            ><button class="filter" data-filter="done" type="button">เสร็จแล้ว</button>
+          </div>
+        </div>
+        <div id="assignmentList" class="assignment-list"></div>
+      </section>
+    </main>
+
+    <dialog id="assignmentDialog">
+      <form id="assignmentForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">NEW ENTRY</p>
+            <h2 id="dialogTitle">เพิ่มงานใหม่</h2>
+          </div>
+          <button class="icon-button" id="closeButton" type="button" aria-label="ปิด">×</button>
+        </div>
+        <input id="assignmentId" type="hidden" />
+        <label
+          >ชื่องาน<input
+            id="titleInput"
+            name="title"
+            required
+            maxlength="120"
+            placeholder="เช่น ส่งรายงานวิทยาศาสตร์"
+        /></label>
+        <div class="form-row">
+          <label
+            >วิชา<input
+              id="subjectInput"
+              name="subject"
+              required
+              maxlength="80"
+              placeholder="เช่น วิทยาศาสตร์" /></label
+          ><label>กำหนดส่ง<input id="dueDateInput" name="due_date" type="date" /></label>
+        </div>
+        <div class="form-row">
+          <label
+            >สถานะ<select id="statusInput" name="status">
+              <option value="todo">ยังไม่เริ่ม</option>
+              <option value="doing">กำลังทำ</option>
+              <option value="done">เสร็จแล้ว</option>
+            </select></label
+          ><label
+            >ความสำคัญ<select id="priorityInput" name="priority">
+              <option value="normal">ปกติ</option>
+              <option value="high">สำคัญมาก</option>
+              <option value="low">ไว้ทีหลัง</option>
+            </select></label
+          >
+        </div>
+        <label
+          >โน้ตเพิ่มเติม<textarea
+            id="notesInput"
+            name="notes"
+            rows="3"
+            maxlength="500"
+            placeholder="รายละเอียดสั้นๆ หรือสิ่งที่ต้องเตรียม"
+          ></textarea>
+        </label>
+        <div class="dialog-actions">
+          <button class="text-button" id="cancelButton" type="button">ยกเลิก</button
+          ><button class="primary-button" type="submit">บันทึกงาน</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="/app.js"></script>
+  </body>
 </html>
