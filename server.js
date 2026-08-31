@@ -275,7 +275,11 @@ app.delete('/api/assignments/:id', requireUser, (req, res) => {
   res.status(204).end();
 });
 
-app.get('*splat', (req, res) => {
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
