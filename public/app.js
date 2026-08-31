@@ -5,6 +5,7 @@ const dialog = document.querySelector('#assignmentDialog');
 const form = document.querySelector('#assignmentForm');
 const authView = document.querySelector('#authView');
 const appShell = document.querySelector('#appShell');
+const appVersion = document.querySelector('#appVersion');
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
 const formatDate = (value) => value ? new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`)) : 'ไม่ระบุวันส่ง';
@@ -23,6 +24,10 @@ function render() {
     const query = state.search.toLowerCase();
     return matchesFilter && (!query || `${item.title} ${item.subject} ${item.notes}`.toLowerCase().includes(query));
   });
+
+  if (appVersion) {
+    appVersion.textContent = 'v1.1';
+  }
 
   const done = state.assignments.filter((item) => item.status === 'done').length;
   const doing = state.assignments.filter((item) => item.status === 'doing').length;

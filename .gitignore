@@ -3,4 +3,6 @@
 !.env.example
 node_modules/
 data/
+app.log
+app.err
 vps01-cicd-student-guide.md
